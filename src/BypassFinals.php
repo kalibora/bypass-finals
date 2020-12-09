@@ -214,9 +214,18 @@ class BypassFinals
     public function url_stat(string $path, int $flags)
     {
         $func = $flags & STREAM_URL_STAT_LINK ? 'lstat' : 'stat';
-        return $flags & STREAM_URL_STAT_QUIET
-            ? @$this->native($func, $path)
-            : $this->native($func, $path);
+
+        try {
+            $result = $this->native($func, $path);
+        } catch (\Exception $e) {
+            if ($flags & STREAM_URL_STAT_QUIET) {
+                return null;
+            }
+
+            throw $e;
+        }
+
+        return $result;
     }
 
 
